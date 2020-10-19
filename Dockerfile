@@ -1,6 +1,6 @@
 # Build Stage #
 
-FROM rust:1.40.0 AS builder
+FROM rust AS builder
 WORKDIR /usr/src/
 RUN rustup install nightly
 RUN rustup default nightly
@@ -8,10 +8,10 @@ RUN rustup target add x86_64-unknown-linux-musl
 
 RUN USER=root cargo new app
 WORKDIR /usr/src/app
-COPY Cargo.toml Cargo.lock ./
+ADD Cargo.toml Cargo.lock ./
 RUN cargo build --release
 
-COPY src ./src
+ADD src ./src
 RUN cargo install --target x86_64-unknown-linux-musl --path .
 
 # Bundle Stage #
