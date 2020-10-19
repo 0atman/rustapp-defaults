@@ -1,4 +1,4 @@
-# Sensible Web Defaults For Rust
+# Sensible Webapp Defaults For Rust
 
 ## Pre-requisites
  - Docker
