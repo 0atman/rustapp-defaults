@@ -10,4 +10,4 @@ edition = "2018"
 rocket = "0.4.4"
 reqwest = { version = "0.10", features = ["json"] }
 tokio = { version = "0.3", features = ["full"] }
-mini-redis = "0.3"
+simple_redis = "0.5.2"

@@ -7,25 +7,34 @@
 #[macro_use] extern crate rocket;
 
 use std::env;
-use mini_redis::{client, Result};
-use rocket::http::RawStr;
 
 #[get("/store/<id>")]
-async fn retrieve(id: &RawStr) -> Result<String> {
-    let mut client = client::connect("127.0.0.1:6379").await?;
-    let result = client.get(&id.to_string()).await?;
-    Ok(format!("{}", id))
+fn retrieve(id: String) -> String {
+    match simple_redis::create("redis://127.0.0.1:6379/") {
+        Ok(mut client) => {
+            match client.get_string(&id) {
+                Ok(value) => value,
+                Err(error) => error.to_string(),
+            }
+        }
+        Err(error) => "redis error".to_string() + &error.to_string(),
+    }
 }
 
 #[get("/store/<id>/<val>")]
-fn set(id: &RawStr, val: &RawStr) -> String {
-    let value= val.to_string();
-
-    format!("{}: {:?}", id, value)
+fn set(id: String, val: String) -> String {
+    match simple_redis::create("redis://127.0.0.1:6379/") {
+        Ok(mut client) => {
+            match client.set(&id, &*val) {
+                Err(error) => error.to_string(),
+                _ => "Value set in Redis".to_string(),
+            }
+        }
+        Err(error) => error.to_string(),
+    }
 }
 
-#[tokio::main]
-async fn main() -> Result<()> {
+fn main() {
     match env::var("PORT") {
         Ok(val) => env::set_var("ROCKET_PORT", val),
         Err(e) => println!("Error: {}", e),
@@ -33,5 +42,4 @@ async fn main() -> Result<()> {
     rocket::ignite()
         .mount("/", routes![retrieve, set])
         .launch();
-    Ok(())
 }
